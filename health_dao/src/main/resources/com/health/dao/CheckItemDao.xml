@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace属性：名称空间， 写接口的全限定名-->
+<mapper namespace="com.health.dao.CheckItemDao">
+
+    <!--查询所有检查项-->
+    <select id="findAll" resultType="CheckItem">
+        select * from t_checkitem
+    </select>
+
+    <!--新增检查项-->
+<!--    <insert id="add" parameterType="CheckItem">-->
+<!--        insert into t_checkitem(code,name,sex,age,)price,type,remark,attention)-->
+<!--        values(#{code},#{name},#{sex},#{age},#{price},#{type},#{remark},#{attention})-->
+<!--    </insert>-->
+    <insert id="add" parameterType="checkitem">
+        insert into t_checkitem (code,name,sex,age,price,type,remark,attention)
+        values(#{code},#{name},#{sex},#{age},#{price},#{type},#{remark},#{attention})
+    </insert>
+
+    <!--检查项分页查询-->
+    <select id="findByCondition" resultType="CheckItem" parameterType="string">
+        select * From t_checkitem
+        <if test="value !=null and value.length > 0">
+            where code like #{value} or name like #{value}
+        </if>
+    </select>
+
+    <!--查询检查项是否被检查组使用-->
+    <select id="findCountByCheckItemId" parameterType="int" resultType="int">
+    select count(1) from t_checkgroup_checkitem where checkitem_id=#{id}
+    </select>
+
+    <!--删除检查项-->
+    <delete id="deleteById" parameterType="int">
+    delete from t_checkitem where id=#{id}
+    </delete>
+
+    <!--通过id查询检查项-->
+    <select id="findById" parameterType="int" resultType="checkitem">
+        select * from t_checkitem where id=#{id}
+    </select>
+
+    <!--编辑检查项-->
+    <update id="update" parameterType="checkitem">
+        update t_checkitem
+        set
+            code=#{code},
+            name=#{name},
+            sex=#{sex},
+            age=#{age},
+            price=#{price},
+            type=#{type},
+            remark=#{remark},
+            attention=#{attention}
+        where id=#{id}
+    </update>
+</mapper>

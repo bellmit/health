@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace属性：名称空间， 写接口的全限定名-->
+<mapper namespace="com.health.dao.SetmealDao">
+    <!--新增套餐-->
+    <insert id="add" parameterType="setmeal">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into t_setmeal (name,code,helpCode,sex,age,price,remark,attention,img)
+        values(#{name},#{code},#{helpCode},#{sex},#{age},#{price},#{remark},#{attention},#{img})
+    </insert>
+
+    <!--添加套餐与检查组关系-->
+    <insert id="addSetmealCheckgroup" parameterType="int">
+        insert into t_setmeal_checkgroup (setmeal_id,checkgroup_id)
+        values(#{setmealId},#{checkgroupId})
+    </insert>
+
+    <!--套餐分页条件查询-->
+    <select id="findByCondition" parameterType="String" resultType="setmeal">
+        select * from t_setmeal
+        <where>
+            <if test="value != null and value.length > 0">
+                code like #{queryString} or name like #{queryString} or helpCode like #{queryString}
+            </if>
+        </where>
+    </select>
+
+    <!--通过id查询套餐信息-->
+    <select id="findById" parameterType="int" resultType="setmeal">
+        select * from t_setmeal where id=#{id}
+    </select>
+
+    <!--查询选择的检查组id集合-->
+    <select id="findCheckGroupIdsBySetmealId" parameterType="int" resultType="int">
+        select checkgroup_id from t_setmeal_checkgroup where setmeal_id=#{id}
+    </select>
+
+    <!--更新套餐-->
+    <update id="update" parameterType="setmeal">
+        update t_setmeal
+        set
+            name=#{name},
+            code=#{code},
+            helpCode=#{helpCode},
+            sex=#{sex},
+            age=#{age},
+            price=#{price},
+            remark=#{remark},
+            attention=#{attention},
+            img=#{img}
+        where id=#{id}
+    </update>
+
+    <!--删除旧关系-->
+    <delete id="deleteSetmealCheckGroup" parameterType="int">
+        delete from t_setmeal_checkgroup where setmeal_id=#{id}
+    </delete>
+
+    <!--判断是否被订单使用-->
+    <select id="findCountBySetmealId" parameterType="int" resultType="int">
+        select count(1) from t_order where setmeal_id=#{id}
+    </select>
+
+    <!--删除套餐-->
+    <delete id="deleteById" parameterType="int">
+        delete from t_setmeal where id=#{id}
+    </delete>
+
+    <!--获取数据库所有图片-->
+    <select id="findImgs" resultType="String">
+    select img from t_setmeal
+    </select>
+
+    <select id="findAll" resultType="setmeal">
+        select * from t_setmeal
+    </select>
+    <!--根据套餐id查询检查项信息-->
+    <select id="findCheckGroupBySetmealId" resultType="checkgroup">
+        select * from t_checkgroup  where id
+        in (select checkgroup_id from t_setmeal_checkgroup where setmeal_id=#{id})
+    </select>
+
+    <!--根据检查组id查询检查项信息-->
+    <select id="findCheckItemsByCheckGroupId" resultType="com.health.pojo.CheckItem">
+        select * from t_checkitem  where id
+        in (select checkitem_id from t_checkgroup_checkitem where checkgroup_id=#{id})
+    </select>
+
+    <!--套餐预约占比-->
+    <select id="getSetmealReport" resultType="map">
+        select s.name,count(1) value from t_setmeal s, t_order o
+        where s.id=o.setmeal_id group by s.id,s.name
+    </select>
+</mapper>
